@@ -1,0 +1,122 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <windows.h>
+
+using namespace std;
+
+// Визначення структури Cake
+struct Cake {
+    string name;
+    double weight;
+};
+
+// Прототипи функцій
+void InputCakes(vector<Cake>& cakes);
+double CalculateAverageWeight(const vector<Cake>& cakes);
+void SortCakesByWeight(vector<Cake>& cakes);
+void SearchCakeByName(const vector<Cake>& cakes);
+void WriteToFile(const vector<Cake>& cakes, const string& filename);
+void ReadFromFile(vector<Cake>& cakes, const string& filename);
+void DisplayCakes(const vector<Cake>& cakes);
+
+int main() {
+    // Налаштування кирилиці для Windows
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
+    vector<Cake> cakes;
+    string filename = "cakes.txt";
+    int choice;
+
+    do {
+        cout << "\n--- Cake Search & Management Menu ---\n";
+        cout << "1. Додати дані вручну\n";
+        cout << "2. Обчислити середню вагу\n";
+        cout << "3. Сортувати за вагою (зростання)\n";
+        cout << "4. Пошук торта за назвою\n";
+        cout << "5. Зберегти у файл\n";
+        cout << "6. Завантажити з файлу\n";
+        cout << "7. Вивести список на екран\n";
+        cout << "0. Вихід\n";
+        cout << "Ваш вибір: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: InputCakes(cakes); break;
+        case 2: 
+            if (cakes.empty()) cout << "Список порожній!" << endl;
+            else cout << "Середня вага: " << CalculateAverageWeight(cakes) << " кг" << endl; 
+            break;
+        case 3: SortCakesByWeight(cakes); cout << "Дані відсортовано." << endl; break;
+        case 4: SearchCakeByName(cakes); break;
+        case 5: WriteToFile(cakes, filename); cout << "Дані збережено." << endl; break;
+        case 6: ReadFromFile(cakes, filename); cout << "Дані завантажено." << endl; break;
+        case 7: DisplayCakes(cakes); break;
+        case 0: cout << "Вихід..." << endl; break;
+        default: cout << "Невірний вибір!" << endl;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
+
+// Реалізація функцій (згідно з llab6.cpp)
+void InputCakes(vector<Cake>& cakes) {
+    int n;
+    cout << "Скільки записів додати? ";
+    cin >> n;
+    for (int i = 0; i < n; ++i) {
+        Cake c;
+        cout << "Назва: "; cin >> c.name;
+        cout << "Вага: "; cin >> c.weight;
+        cakes.push_back(c);
+    }
+}
+
+double CalculateAverageWeight(const vector<Cake>& cakes) {
+    double sum = 0;
+    for (const auto& c : cakes) sum += c.weight;
+    return sum / cakes.size();
+}
+
+void SortCakesByWeight(vector<Cake>& cakes) {
+    sort(cakes.begin(), cakes.end(), [](const Cake& a, const Cake& b) {
+        return a.weight < b.weight;
+    });
+}
+
+void SearchCakeByName(const vector<Cake>& cakes) {
+    string query;
+    cout << "Введіть назву для пошуку: ";
+    cin >> query;
+    bool found = false;
+    for (const auto& c : cakes) {
+        if (c.name == query) {
+            cout << "Знайдено: " << c.name << " (" << c.weight << " кг)" << endl;
+            found = true;
+        }
+    }
+    if (!found) cout << "Нічого не знайдено." << endl;
+}
+
+void WriteToFile(const vector<Cake>& cakes, const string& filename) {
+    ofstream file(filename);
+    for (const auto& c : cakes) file << c.name << " " << c.weight << endl;
+    file.close();
+}
+
+void ReadFromFile(vector<Cake>& cakes, const string& filename) {
+    ifstream file(filename);
+    if (!file) return;
+    cakes.clear();
+    Cake c;
+    while (file >> c.name >> c.weight) cakes.push_back(c);
+    file.close();
+}
+
+void DisplayCakes(const vector<Cake>& cakes) {
+    for (const auto& c : cakes) cout << c.name << " - " << c.weight << " кг" << endl;
+}
